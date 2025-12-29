@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The New Year Dinner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --c-ivory: #F7F3EB;
+            --c-ivory-dark: #eee8dc;
+            --c-maroon: #6B1E2E;
+            --c-maroon-dark: #4a1520;
+            --c-gold: rgba(212, 175, 55, 0.9);
+            --c-gold-soft: rgba(212, 175, 55, 0.5);
+            --c-text: #2C1B18;
+            --c-text-muted: #5d4037;
+            --f-heading: 'Cinzel', serif;
+            --f-subheading: 'Cormorant Garamond', serif;
+            --f-body: 'Montserrat', sans-serif;
+            --t-fade: opacity 1.5s ease-out, transform 1.5s ease-out;
+            --t-snap: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            --t-smooth: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--c-ivory);
+            color: var(--c-text);
+            font-family: var(--f-body);
+            overflow-x: hidden;
+            line-height: 1.8;
+            width: 100vw;
+        }
+
+        #particles,
+        #fireworks-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .view-container {
+            width: 100vw;
+            min-height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-in-out, visibility 1s;
+            z-index: 1;
+        }
+
+        .view-active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+            position: relative;
+        }
+
+        #view-hero,
+        #view-quiz {
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #view-hero {
+            background: radial-gradient(circle at center, #fffbf2 0%, #e6dfcf 100%);
+        }
+
+        #view-quiz {
+            background-color: var(--c-ivory);
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: var(--f-heading);
+            color: var(--c-maroon);
+            text-align: center;
+        }
+
+        h1 {
+            font-weight: 500;
+            letter-spacing: 2px;
+        }
+
+        p {
+            font-family: var(--f-subheading);
+            color: var(--c-text-muted);
+            text-align: center;
+            font-size: 1.25rem;
+        }
+
+        .divider {
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--c-gold), transparent);
+            margin: 35px auto;
+        }
+
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: var(--c-maroon);
+            width: 0%;
+            z-index: 9999;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-luxury {
+            padding: 18px 45px;
+            background: transparent;
+            border: 1px solid var(--c-maroon);
+            color: var(--c-maroon);
+            font-family: var(--f-body);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: var(--t-smooth);
+            position: relative;
+            overflow: hidden;
+            font-size: 0.85rem;
+            margin-top: 40px;
+            border-radius: 2px;
+        }
+
+        .btn-luxury::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: var(--c-maroon);
+            transition: 0.4s ease;
+            z-index: -1;
+        }
+
+        .btn-luxury:hover {
+            color: var(--c-ivory);
+            letter-spacing: 5px;
+        }
+
+        .btn-luxury:hover::after {
+            width: 100%;
+        }
+
+        section {
+            min-height: 80vh;
+            padding: 100px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: var(--t-fade);
+            position: relative;
+            z-index: 2;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .quiz-card {
+            width: 160px;
+            height: 200px;
+            border: 1px solid rgba(107, 30, 46, 0.15);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--t-snap);
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--c-gold);
+            box-shadow: 0 15px 30px rgba(107, 30, 46, 0.1);
+        }
+
+        .food-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .food-name {
+            font-family: var(--f-body);
+            font-size: 0.9rem;
+            color: var(--c-maroon);
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .error-shake {
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+            border-color: #c62828 !important;
+        }
+
+        .correct-select {
+            border-color: #2e7d32 !important;
+            background-color: rgba(46, 125, 50, 0.03);
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translateX(-1px)
+            }
+
+            20%,
+            80% {
+                transform: translateX(2px)
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translateX(-4px)
+            }
+
+            40%,
+            60% {
+                transform: translateX(4px)
+            }
+        }
+
+        .timeline {
+            position: relative;
+            text-align: left;
+            margin: 40px auto;
+            display: inline-block;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15px;
+            bottom: 15px;
+            width: 1px;
+            background: var(--c-gold-soft);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 50px;
+            padding-left: 25px;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: var(--t-smooth);
+        }
+
+        .timeline-item.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -6px;
+            top: 8px;
+            width: 13px;
+            height: 13px;
+            background: var(--c-ivory);
+            border: 1px solid var(--c-maroon);
+            border-radius: 50%;
+        }
+
+        .time-label {
+            font-family: var(--f-body);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--c-maroon);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .event-title {
+            font-family: var(--f-heading);
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--c-text);
+        }
+
+        .event-desc {
+            font-style: italic;
+            font-size: 1rem;
+            color: var(--c-text-muted);
+            opacity: 0.8;
+        }
+
+        .attire-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+
+        .attire-card {
+            width: 260px;
+            height: 360px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: var(--t-smooth);
+            cursor: pointer;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+        }
+
+        .attire-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(107, 30, 46, 0.12);
+        }
+
+        .attire-card.maroon {
+            background: var(--c-maroon);
+        }
+
+        .attire-card.maroon h3,
+        .attire-card.maroon .card-desc {
+            color: var(--c-ivory);
+        }
+
+        .attire-card.ivory {
+            border: 1px solid var(--c-maroon);
+        }
+
+        .card-desc {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: var(--t-smooth);
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        .attire-card:hover .card-desc {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .menu-preview {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 50px;
+        }
+
+        .menu-item {
+            padding: 30px;
+            border: 1px solid transparent;
+            transition: var(--t-smooth);
+            width: 220px;
+        }
+
+        .menu-item:hover {
+            border-color: var(--c-gold-soft);
+            background: #fff;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .steam {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            opacity: 0;
+            transition: 0.8s;
+            font-size: 1.2rem;
+        }
+
+        .menu-item:hover .steam {
+            opacity: 1;
+            transform: translateY(-15px);
+        }
+
+        .menu-desc {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--t-smooth);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .menu-item:hover .menu-desc {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-wrapper {
+            cursor: pointer;
+            padding: 40px;
+            display: inline-block;
+        }
+
+        .toast-icon {
+            font-size: 4.5rem;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+        }
+
+        .toast-wrapper:hover .toast-icon {
+            transform: rotate(-10deg) scale(1.1);
+        }
+
+        .toast-msg {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: var(--t-smooth);
+            margin-top: 25px;
+            font-style: italic;
+            font-size: 1.5rem;
+            color: var(--c-maroon);
+        }
+
+        .toast-wrapper.active .toast-msg {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-wrapper.active .toast-icon {
+            transform: rotate(0) scale(1);
+        }
+
+        .memory-gallery {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px;
+            scrollbar-width: none;
+            justify-content: center;
+        }
+
+        .memory-card {
+            width: 220px;
+            height: 300px;
+            background: #fff;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: var(--t-smooth);
+            border: 1px solid #eee;
+        }
+
+        .memory-card:hover {
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            z-index: 5;
+        }
+
+        .memory-img {
+            width: 100%;
+            height: 220px;
+            background: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            color: #ddd;
+        }
+
+        .memory-caption {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            transition: 0.4s;
+        }
+
+        .memory-card:hover .memory-caption {
+            opacity: 1;
+            color: var(--c-maroon);
+        }
+
+        .wish-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .btn-wish {
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            background: var(--c-maroon);
+            color: #fff;
+            font-family: var(--f-body);
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 5;
+        }
+
+        .btn-wish:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(107, 30, 46, 0.2);
+        }
+
+        .lantern {
+            position: absolute;
+            bottom: -50px;
+            width: 24px;
+            height: 36px;
+            background: radial-gradient(circle, #ffeb3b 10%, #ff9800 100%);
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes flyUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-800px) scale(0.2);
+                opacity: 0;
+            }
+        }
+
+        .quote-box p {
+            font-family: var(--f-subheading);
+            font-size: 2rem;
+            font-style: italic;
+            color: var(--c-maroon);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.5s ease, transform 1.5s ease;
+            margin-bottom: 15px;
+        }
+
+        .quote-box p.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .envelope-wrapper {
+            cursor: pointer;
+            perspective: 1000px;
+            width: 220px;
+            height: 150px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .envelope-body {
+            width: 100%;
+            height: 100%;
+            background: var(--c-maroon);
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--c-gold);
+            font-size: 2.5rem;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: var(--c-maroon-dark);
+            transform-origin: top;
+            transition: transform 0.8s 0.2s;
+            z-index: 3;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+        }
+
+        .envelope-paper {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 200px;
+            height: 130px;
+            background: #fff;
+            z-index: 1;
+            transition: transform 0.8s 0.8s, opacity 0.5s;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--f-subheading);
+            font-size: 1rem;
+            opacity: 0;
+            text-align: center;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+
+        .envelope-wrapper.open .envelope-paper {
+            transform: translateY(-100px);
+            opacity: 1;
+            z-index: 4;
+        }
+
+        .btn-hold {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid var(--c-gold);
+            color: var(--c-maroon);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--f-heading);
+            margin: 0 auto;
+        }
+
+        .btn-hold:active {
+            transform: scale(0.95);
+        }
+
+        .hold-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: rgba(212, 175, 55, 0.4);
+            pointer-events: none;
+            z-index: 1;
+            transition: height 0.05s linear;
+        }
+
+        .secret-text {
+            font-size: 1.6rem;
+            margin-bottom: 30px;
+            transition: opacity 0.8s;
+            min-height: 40px;
+            letter-spacing: 1px;
+        }
+
+        .pickup-time {
+            font-family: var(--f-heading);
+            font-size: 4rem;
+            color: var(--c-maroon);
+            margin: 20px 0;
+            position: relative;
+            cursor: default;
+            animation: pulse 3s infinite;
+        }
+
+        .pickup-helper {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            bottom: -30px;
+            left: 0;
+            font-size: 1rem;
+            color: var(--c-gold);
+            transition: var(--t-snap);
+            font-family: var(--f-body);
+        }
+
+        .pickup-time:hover .pickup-helper {
+            opacity: 1;
+            bottom: -20px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1
+            }
+
+            50% {
+                transform: scale(1.02);
+                opacity: 0.9
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        #countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .time-val {
+            font-family: var(--f-heading);
+            font-size: 3rem;
+            color: var(--c-maroon);
+            line-height: 1;
+        }
+
+        .time-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--c-gold);
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .quote-box p {
+                font-size: 1.5rem;
+            }
+
+            .pickup-time {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="bgMusic" loop>
+        <source src="perfect-instrumental.mp3" type="audio/mpeg">
+    </audio>
+    <div class="music-control hidden" id="musicBtn" onclick="toggleMusic()"
+        style="position:fixed; bottom:30px; right:30px; width:50px; height:50px; border-radius:50%; border:1px solid var(--c-maroon); display:flex; justify-content:center; align-items:center; z-index:100; background:var(--c-ivory); color:var(--c-maroon); cursor:pointer;">
+        ♪</div>
+    <div class="scroll-progress" id="progressBar"></div>
+    <div id="particles"></div>
+    <canvas id="fireworks-canvas"></canvas>
+
+    <div id="view-hero" class="view-container view-active">
+        <h1 class="hero-title">A New Year Dinner<br>Invitation</h1>
+        <div class="divider"></div>
+        <p>For Someone Special</p>
+        <button class="btn-luxury" onclick="goToQuiz()">Begin the Night</button>
+    </div>
+
+    <div id="view-quiz" class="view-container">
+        <h2 style="font-size: 1.8rem; margin-bottom: 40px;">Which type of rice do I like the most?</h2>
+        <div class="quiz-options">
+            <div class="quiz-card" onclick="checkAnswer(this, 'wrong')">
+                <div class="food-icon">🍚</div>
+                <div class="food-name">Nasi Kuning</div>
+            </div>
+            <div class="quiz-card" onclick="checkAnswer(this, 'wrong')">
+                <div class="food-icon">🥥</div>
+                <div class="food-name">Nasi Uduk</div>
+            </div>
+            <div class="quiz-card" onclick="checkAnswer(this, 'correct')">
+                <div class="food-icon">🥘</div>
+                <div class="food-name">Nasi Goreng</div>
+            </div>
+        </div>
+        <button id="btnProceed" class="btn-luxury hidden" onclick="goToMain()">Proceed</button>
+    </div>
+
+    <div id="view-main" class="view-container">
+        <section id="atmosphere">
+            <div class="container">
+                <h2>The Atmosphere</h2>
+                <div class="divider"></div>
+                <p>An evening of quiet elegance, warmth, and shared moments.</p>
+            </div>
+        </section>
+
+        <section id="schedule">
+            <div class="container">
+                <h2>The Timeline</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <span class="time-label">17:35</span>
+                        <div class="event-title">Pick-up moment</div>
+                        <div class="event-desc">I will pick you up at this time.<br>Please note, a slight delay of
+                            approximately 5–10 minutes may occur.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <span class="time-label">20:50</span>
+                        <div class="event-title">Creating end-of-year memories</div>
+                        <div class="event-desc">A quiet moment to capture stories, laughter, and memories before the
+                            year ends.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <span class="time-label">21:30 – 00:00</span>
+                        <div class="event-title">Night ambience & late-night treats</div>
+                        <div class="event-desc">Enjoying the night atmosphere together, strolling around, and buying
+                            some late-night snacks while welcoming the new year.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="attire">
+            <div class="container">
+                <h2>The Attire</h2>
+                <p style="margin-bottom: 30px;">Dress to impress</p>
+                <div class="attire-grid">
+                    <div class="attire-card maroon">
+                        <h3>Maroon</h3>
+                        <div class="card-desc">Warm • Bold • Confident</div>
+                    </div>
+                    <div class="attire-card ivory">
+                        <h3>Ivory</h3>
+                        <div class="card-desc">Soft • Elegant • Timeless</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="menu">
+            <div class="container">
+                <h2>Menu Preview</h2>
+                <div class="menu-preview">
+                    <div class="menu-item">
+                        <div style="font-size:3rem; position:relative;">🥩<span class="steam">♨</span></div>
+                        <h3 style="font-size:1.1rem; margin-top:10px;">Main Course</h3>
+                        <div class="menu-desc">Succulent & Savory</div>
+                    </div>
+                    <div class="menu-item">
+                        <div style="font-size:3rem; position:relative;">🍷<span class="steam">✨</span></div>
+                        <h3 style="font-size:1.1rem; margin-top:10px;">Beverage</h3>
+                        <div class="menu-desc">Classy & Bold</div>
+                    </div>
+                    <div class="menu-item">
+                        <div style="font-size:3rem; position:relative;">🍰<span class="steam">❤</span></div>
+                        <h3 style="font-size:1.1rem; margin-top:10px;">Dessert</h3>
+                        <div class="menu-desc">Sweet Ending</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="mood">
+            <div class="container">
+                <h2>Dinner Mood</h2>
+                <div class="divider"></div>
+                <div style="font-size: 3rem; color: var(--c-gold); margin: 20px 0;">✦ &nbsp;&nbsp; Y &nbsp;&nbsp; 🕯
+                </div>
+                <p>Intimate • Exquisite • Warm</p>
+            </div>
+        </section>
+
+        <section id="toast">
+            <div class="container">
+                <h2>A Toast</h2>
+                <div class="toast-wrapper" onclick="this.classList.toggle('active')">
+                    <div class="toast-icon">🥂</div>
+                    <div class="toast-msg">"To us and the new year ahead"</div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <section id="flashback">
+            <div class="container">
+                <h2>A Little Flashback</h2>
+                <div class="quiz-card"
+                    style="width: 100%; max-width: 400px; height: auto; padding: 40px; margin: 30px auto;"
+                    onclick="this.querySelector('.hidden-msg').style.display='block'">
+                    <p style="font-style:italic; color:var(--c-maroon);">"Do you remember where it all started?"</p>
+                    <p style="font-size:0.9rem; margin-top:10px; color:var(--c-gold);">(Tap to remember)</p>
+                    <div class="hidden-msg"
+                        style="display:none; margin-top:20px; border-top:1px dashed var(--c-gold); padding-top:20px;">It
+                        was a simple hello, but it changed everything.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="wish">
+            <div class="container">
+                <h2>Make a Wish</h2>
+                <p>Send a wish for us into the night sky.</p>
+                <div class="wish-container">
+                    <button class="btn-wish" onclick="releaseLanterns(this)">RELEASE LANTERNS</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="quote">
+            <div class="container quote-box">
+                <p>Tonight is not just about food.</p>
+                <p>It’s about time,</p>
+                <p>moments,</p>
+                <p>and us.</p>
+            </div>
+        </section>
+
+        <section id="envelope">
+            <div class="container">
+                <h2>Secret Envelope</h2>
+                <br>
+                <div class="envelope-wrapper" onclick="this.classList.toggle('open')">
+                    <div class="envelope-flap"></div>
+                    <div class="envelope-body">✉</div>
+                    <div class="envelope-paper">"Some moments don’t need to be rushed.
+                        They simply wait, quietly, to be felt together"</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="destination">
+            <div class="container">
+                <h2>The Destination</h2>
+                <p class="secret-text" id="secretText">Still a secret</p>
+                <button class="btn-hold" id="holdBtn">HOLD<div class="hold-progress" id="holdProgress"></div></button>
+            </div>
+        </section>
+
+        <section id="pickup">
+            <div class="container">
+                <h2>Don't Forget</h2>
+                <div class="pickup-time">17:35<div class="pickup-helper">I’ll be there on time.</div>
+                </div>
+                <p>I'll be waiting.</p>
+            </div>
+        </section>
+
+        <section id="countdown">
+            <div class="container">
+                <h2>Counting Down</h2>
+                <div class="divider"></div>
+                <div id="countdown-timer">
+                    <div>
+                        <div class="time-val" id="days">00</div>
+                        <div class="time-label">Days</div>
+                    </div>
+                    <div>
+                        <div class="time-val" id="hours">00</div>
+                        <div class="time-label">Hrs</div>
+                    </div>
+                    <div>
+                        <div class="time-val" id="mins">00</div>
+                        <div class="time-label">Mins</div>
+                    </div>
+                    <div>
+                        <div class="time-val" id="secs">00</div>
+                        <div class="time-label">Secs</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div style="height: 150px;"></div>
+    </div>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const $$ = (sel) => document.querySelectorAll(sel);
+        function goToQuiz() {
+            $('view-hero').classList.remove('view-active');
+            setTimeout(() => $('view-quiz').classList.add('view-active'), 800);
+        }
+        function goToMain() {
+            $('view-quiz').classList.remove('view-active');
+            const m = $('bgMusic'); if (m) { m.volume = 0.5; m.play().catch(() => { }); }
+            $('musicBtn').classList.remove('hidden');
+            setTimeout(() => { $('view-main').classList.add('view-active'); initMainPage(); }, 800);
+        }
+        function checkAnswer(el, type) {
+            if (type === 'wrong') { el.classList.add('error-shake'); setTimeout(() => el.classList.remove('error-shake'), 500); }
+            else { $$('.quiz-card').forEach(c => c.classList.remove('correct-select')); el.classList.add('correct-select'); $('btnProceed').classList.remove('hidden'); }
+        }
+        function toggleMusic() { const m = $('bgMusic'); if (m.paused) { m.play(); $('musicBtn').style.opacity = 1; } else { m.pause(); $('musicBtn').style.opacity = 0.5; } }
+        function initMainPage() {
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        if (e.target.id === 'schedule') animateList('.timeline-item');
+                        if (e.target.id === 'quote') animateList('.quote-box p', 1000);
+                    }
+                });
+            }, { threshold: 0.15 });
+            $$('section').forEach(s => obs.observe(s));
+            window.addEventListener('scroll', () => { $('progressBar').style.width = (document.documentElement.scrollTop / (document.documentElement.scrollHeight - document.documentElement.clientHeight)) * 100 + "%"; });
+            initParticles(); initCountdown(); initHoldButton();
+        }
+        function animateList(sel, delay = 350) { $$(sel).forEach((el, i) => setTimeout(() => el.classList.add('show'), i * delay)); }
+        function releaseLanterns(btn) {
+            const c = btn.parentElement;
+            for (let i = 0; i < 8; i++) {
+                const l = document.createElement('div'); l.classList.add('lantern');
+                l.style.left = (Math.random() * 90 + 5) + '%'; l.style.animation = `flyUp ${Math.random() * 3 + 4}s ease-out forwards`;
+                c.appendChild(l);
+            }
+            btn.innerText = "Wishes Released ❤"; btn.style.background = "#2e7d32"; btn.style.pointerEvents = "none";
+        }
+        function initHoldButton() {
+            const btn = $('holdBtn'), bar = $('holdProgress'), txt = $('secretText');
+            let info = { request: null, progress: 0 };
+
+            const frame = () => {
+                info.progress += 2; // Speed
+                bar.style.height = info.progress + '%';
+                if (info.progress < 100) {
+                    info.request = requestAnimationFrame(frame);
+                } else {
+                    // Completed
+                    txt.style.opacity = 0;
+                    setTimeout(() => {
+                        txt.innerText = "Just trust me";
+                        txt.style.color = "var(--c-maroon)";
+                        txt.style.fontFamily = "var(--f-heading)";
+                        txt.style.opacity = 1;
+                        btn.style.opacity = 0;
+                        btn.style.pointerEvents = 'none';
+                    }, 500);
+                }
+            };
+
+            const start = (e) => {
+                e.preventDefault();
+                btn.style.transform = 'scale(0.95)';
+                info.progress = 0;
+                cancelAnimationFrame(info.request);
+                info.request = requestAnimationFrame(frame);
+            };
+
+            const end = (e) => {
+                e.preventDefault();
+                if (info.progress < 100) {
+                    cancelAnimationFrame(info.request);
+                    info.progress = 0;
+                    bar.style.height = '0%';
+                    btn.style.transform = 'scale(1)';
+                }
+            };
+
+            btn.addEventListener('mousedown', start); btn.addEventListener('touchstart', start);
+            btn.addEventListener('mouseup', end); btn.addEventListener('touchend', end); btn.addEventListener('mouseleave', end);
+        }
+        function initCountdown() {
+            const target = new Date("Dec 31, 2025 17:35:00").getTime();
+            setInterval(() => {
+                const now = new Date().getTime(), d = target - now;
+                if (d < 0) return;
+                $('days').innerText = String(Math.floor(d / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                $('hours').innerText = String(Math.floor((d % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                $('mins').innerText = String(Math.floor((d % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                $('secs').innerText = String(Math.floor((d % (1000 * 60)) / 1000)).padStart(2, '0');
+                if (Math.random() > 0.96 && $('view-main').classList.contains('view-active')) launchFirework();
+            }, 1000);
+        }
+        function initParticles() {
+            const c = $('particles'); for (let i = 0; i < 40; i++) { const s = document.createElement('div'); s.style.position = 'absolute'; s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 100 + '%'; s.style.width = Math.random() * 3 + 1 + 'px'; s.style.height = s.style.width; s.style.background = 'var(--c-gold)'; s.style.borderRadius = '50%'; s.style.opacity = Math.random() * 0.4; s.style.animation = `flyUp ${Math.random() * 10 + 5}s infinite ease-in-out`; c.appendChild(s); }
+        }
+        const cvs = $('fireworks-canvas'), ctx = cvs.getContext('2d'); let fws = [];
+        const resize = () => { cvs.width = window.innerWidth; cvs.height = window.innerHeight; }; window.addEventListener('resize', resize); resize();
+        function launchFirework() { fws.push({ x: Math.random() * cvs.width, y: cvs.height, tx: Math.random() * cvs.width, ty: Math.random() * cvs.height * 0.4, color: `hsl(${40 + Math.random() * 20},100%,50%)`, particles: [] }); }
+        function animFW() {
+            ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(0, 0, cvs.width, cvs.height);
+            ctx.globalCompositeOperation = 'source-over';
+            fws.forEach((f, i) => {
+                if (f.particles.length > 0) {
+                    f.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.a -= 0.015; ctx.globalAlpha = p.a; ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2); ctx.fill(); });
+                    f.particles = f.particles.filter(p => p.a > 0); if (f.particles.length === 0) fws.splice(i, 1);
+                } else {
+                    f.y -= 5; ctx.globalAlpha = 1; ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(f.x, f.y, 2, 0, Math.PI * 2); ctx.fill();
+                    if (f.y <= f.ty) { for (let k = 0; k < 20; k++) { const ang = Math.random() * Math.PI * 2, sp = Math.random() * 3; f.particles.push({ x: f.x, y: f.y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, a: 1 }); } }
+                }
+            }); requestAnimationFrame(animFW);
+        } animFW();
+    </script>
+</body>
+
+</html>
